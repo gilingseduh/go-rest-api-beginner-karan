@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"go-rest-api-beginner-karan/pkg/mocks"
 	"net/http"
@@ -22,4 +23,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+
+	w.WriteHeader(http.StatusNotFound)
+	json.NewEncoder(w).Encode(fmt.Sprintf("Book with ID %d not found", id))
 }
