@@ -4,26 +4,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"go-rest-api-beginner-karan/pkg/mocks"
+	"go-rest-api-beginner-karan/pkg/models"
 	"net/http"
 	"strconv"
 )
 
-func DeleteBook(w http.ResponseWriter, r *http.Request) {
+func (h handler) DeleteBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 
-	for index, book := range mocks.Books {
-		if book.Id == id {
-			mocks.Books = append(mocks.Books[:index], mocks.Books[index+1:]...)
+	var book models.Book
 
-			w.WriteHeader(http.StatusOK)
-			w.Header().Add("Content-Type", "application/json")
-			json.NewEncoder(w).Encode("Deleted")
-			break
-		}
+	if result := h.DB.First(&book, id); result.Error != nil {
+		fmt.Println(result.Error)
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(fmt.Sprintf("Book with ID %d not found", id))
+	} else {
+		h.DB.Delete(&book)
+		w.WriteHeader(http.StatusOK)
+		w.Header().Add("Content-Type", "application/json")
+		json.NewEncoder(w).Encode("Deleted")
 	}
-
-	w.WriteHeader(http.StatusNotFound)
-	json.NewEncoder(w).Encode(fmt.Sprintf("Book with ID %d not found", id))
 }

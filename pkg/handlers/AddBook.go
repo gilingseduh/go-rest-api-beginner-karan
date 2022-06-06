@@ -1,31 +1,31 @@
 package handlers
 
 import (
-	"encoding/json"
-	"go-rest-api-beginner-karan/pkg/mocks"
-	"go-rest-api-beginner-karan/pkg/models"
-	"io/ioutil"
-	"log"
-	"math/rand"
-	"net/http"
+  "encoding/json"
+  "fmt"
+  "go-rest-api-beginner-karan/pkg/models"
+  "io/ioutil"
+  "log"
+  "net/http"
 )
 
-func AddBook(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
+func (h handler) AddBook(w http.ResponseWriter, r *http.Request) {
+  defer r.Body.Close()
+  body, err := ioutil.ReadAll(r.Body)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
+  if err != nil {
+    log.Fatalln(err)
+  }
 
-	var book models.Book
+  var book models.Book
 
-	json.Unmarshal(body, &book)
+  json.Unmarshal(body, &book)
 
-	book.Id = rand.Intn(100)
-	mocks.Books = append(mocks.Books, book)
+  if result := h.DB.Create(&book); result.Error != nil {
+    fmt.Println(result.Error)
+  }
 
-	w.WriteHeader(http.StatusCreated)
-	w.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Created")
+  w.WriteHeader(http.StatusCreated)
+  w.Header().Add("Content-Type", "application/json")
+  json.NewEncoder(w).Encode("Created")
 }
